@@ -13,7 +13,8 @@ function Verb-Noun {
     param(
         [Parameter(Mandatory, ValueFromPipeline)]
         [ValidateNotNullOrEmpty()]
-        [string[]]$ParameterName
+        [string[]]
+        $ParameterName
     )
 
     begin {
@@ -99,13 +100,16 @@ param(
         HelpMessage = 'Computer name(s)'    # Help text
     )]
     [Alias('CN', 'Server')]                 # Alternative names
-    [string[]]$ComputerName,
+    [string[]]
+    $ComputerName,
 
     [Parameter(ParameterSetName = 'ByPath')]
-    [string]$Path,
+    [string]
+    $Path,
 
     [Parameter(ParameterSetName = 'ByLiteralPath')]
-    [string]$LiteralPath
+    [string]
+    $LiteralPath
 )
 ```
 
@@ -130,15 +134,18 @@ Override mandatory validation:
 param(
     [Parameter(Mandatory)]
     [AllowNull()]                    # Permit $null
-    [string]$OptionalName,
+    [string]
+    $OptionalName,
 
     [Parameter(Mandatory)]
     [AllowEmptyString()]             # Permit ""
-    [string]$Description,
+    [string]
+    $Description,
 
     [Parameter(Mandatory)]
     [AllowEmptyCollection()]         # Permit @()
-    [string[]]$Tags
+    [string[]]
+    $Tags
 )
 ```
 
@@ -151,7 +158,8 @@ function Get-FormattedData {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline)]
-        [string[]]$InputData
+        [string[]]
+        $InputData
     )
 
     begin {
@@ -191,7 +199,8 @@ function ConvertTo-Upper {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline)]
-        [string]$Text
+        [string]
+        $Text
     )
 
     process {
@@ -258,13 +267,16 @@ function Get-Resource {
     [CmdletBinding(DefaultParameterSetName = 'ByName')]
     param(
         [Parameter(ParameterSetName = 'ByName', Mandatory)]
-        [string]$Name,
+        [string]
+        $Name,
 
         [Parameter(ParameterSetName = 'ById', Mandatory)]
-        [int]$Id,
+        [int]
+        $Id,
 
         [Parameter(ParameterSetName = 'All')]
-        [switch]$All
+        [switch]
+        $All
     )
 
     switch ($PSCmdlet.ParameterSetName) {
@@ -321,9 +333,11 @@ function Get-UserInfo {
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string]$UserName,
+        [string]
+        $UserName,
 
-        [switch]$IncludeGroups
+        [switch]
+        $IncludeGroups
     )
 
     # Implementation...

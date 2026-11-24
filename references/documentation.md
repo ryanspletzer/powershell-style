@@ -84,7 +84,8 @@ function Test-Help {
         # Aliases: MP
         [Parameter(Mandatory = $true)]
         [Alias("MP")]
-        [String]$MandatoryParameter
+        [String]
+        $MandatoryParameter
     )
 
     <# code here ... #>
@@ -110,10 +111,12 @@ param (
     [Parameter(Mandatory = $true,
                ValueFromPipelineByPropertyName = $true,
                Position = 0)]
-    [string]$ComputerName,
+    [string]
+    $ComputerName,
 
     # Maximum number of results to return.
-    [int]$MaxResults = 100
+    [int]
+    $MaxResults = 100
 )
 ```
 
@@ -147,7 +150,8 @@ function Get-Example {
     param (
         # Description of this parameter.
         [Parameter(Mandatory)]
-        [string]$Name
+        [string]
+        $Name
     )
 
     # Function body

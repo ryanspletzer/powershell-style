@@ -28,8 +28,7 @@ Use `-ErrorAction Stop`:
 ```powershell
 try {
     Get-Item -Path '/nonexistent' -ErrorAction Stop
-}
-catch {
+} catch {
     Write-Warning "File not found: $($_.Exception.Message)"
 }
 ```
@@ -43,11 +42,9 @@ $ErrorActionPreference = 'Stop'
 try {
     # All cmdlet errors now terminate
     Get-Item -Path '/nonexistent'
-}
-catch {
+} catch {
     # Handle error
-}
-finally {
+} finally {
     $ErrorActionPreference = 'Continue'  # Restore default
 }
 ```
@@ -60,20 +57,16 @@ finally {
 try {
     # Code that might fail
     $result = Get-Content -Path $filePath -ErrorAction Stop
-}
-catch [System.IO.FileNotFoundException] {
+} catch [System.IO.FileNotFoundException] {
     # Handle specific exception type
     Write-Warning "File not found: $filePath"
-}
-catch [System.UnauthorizedAccessException] {
+} catch [System.UnauthorizedAccessException] {
     # Handle another specific type
     Write-Error "Access denied: $filePath"
-}
-catch {
+} catch {
     # Handle all other errors
     Write-Error "Unexpected error: $($_.Exception.Message)"
-}
-finally {
+} finally {
     # Always runs - use for cleanup
     if ($resource) {
         $resource.Dispose()
@@ -123,8 +116,7 @@ if (-not $?) {
 # Good - use try/catch
 try {
     Get-Item -Path '/file' -ErrorAction Stop
-}
-catch {
+} catch {
     Write-Error 'Failed'
 }
 ```
@@ -144,8 +136,7 @@ try {
     if ($result.Count -eq 0) {
         Write-Verbose 'No data found'
     }
-}
-catch {
+} catch {
     Write-Error 'Failed to retrieve data'
 }
 ```
@@ -171,8 +162,10 @@ Handle entire operations as units:
 function Update-Configuration {
     [CmdletBinding()]
     param(
-        [string]$Path,
-        [hashtable]$Settings
+        [string]
+        $Path,
+        [hashtable]
+        $Settings
     )
 
     # Put entire transaction in try block
@@ -190,8 +183,7 @@ function Update-Configuration {
         $config | ConvertTo-Json | Set-Content -Path $Path -ErrorAction Stop
 
         Write-Verbose 'Configuration updated successfully'
-    }
-    catch {
+    } catch {
         Write-Error "Configuration update failed: $($_.Exception.Message)"
         # Entire transaction failed - no partial updates
     }
@@ -217,8 +209,7 @@ function Test-Servers {
                 Status = 'Online'
                 ResponseTime = $result.ResponseTime
             }
-        }
-        catch {
+        } catch {
             [PSCustomObject]@{
                 Computer = $computer
                 Status = 'Offline'
