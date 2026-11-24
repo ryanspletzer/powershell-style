@@ -19,7 +19,7 @@ Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/Power
 | Topic | Key Rule |
 |-------|----------|
 | Function names | `Verb-Noun` with approved verbs |
-| Parameters | Full names, PascalCase, explicit types |
+| Parameters | Full names, PascalCase, explicit types; name every argument except a lone `Write-*` message |
 | Indentation | 4 spaces (not tabs) |
 | Braces | Opening brace on same line (OTBS); `} else {`, `} catch {`, `} finally {` stay cuddled |
 | Param blocks | Type attribute and variable each on their own line, blank line between parameters |
@@ -62,6 +62,11 @@ Verify approved verbs with `Get-Verb`. Common verbs:
 
 - Use **PascalCase** for all public identifiers
 - Use **full parameter names** in scripts (not aliases)
+- Name every parameter you pass (`Get-Process -Name Explorer`, not `Get-Process Explorer`),
+  because readers may not know the command and a future parameter set change can break positional calls
+- Exception: the single message argument to `Write-Verbose`, `Write-Warning`, `Write-Error`,
+  `Write-Debug`, and `Write-Information` may be passed positionally
+  (`Write-Verbose "Loaded $count rows"`)
 - Match common cmdlet parameter names
 
 ```powershell
