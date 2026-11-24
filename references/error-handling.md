@@ -162,10 +162,8 @@ Handle entire operations as units:
 function Update-Configuration {
     [CmdletBinding()]
     param(
-        [string]
-        $Path,
-        [hashtable]
-        $Settings
+        [string]$Path,
+        [hashtable]$Settings
     )
 
     # Put entire transaction in try block

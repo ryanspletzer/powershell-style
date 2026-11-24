@@ -238,8 +238,7 @@ function ConvertTo-CustomObject {
     [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline)]
-        [string]
-        $Line
+        [string]$Line
     )
 
     process {

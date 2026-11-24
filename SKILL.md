@@ -22,8 +22,8 @@ Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/Power
 | Parameters | Full names, PascalCase, explicit types; name every argument, including `-Message` |
 | Indentation | 4 spaces (not tabs) |
 | Braces | Opening brace on same line (OTBS); `} else {`, `} catch {`, `} finally {` stay cuddled |
-| Param blocks | Type attribute and variable each on their own line, blank line between parameters |
-| Blank lines | One after a closing brace, unless `else`/`catch`/`finally` or another `}` follows |
+| Param blocks | Attributes on their own lines, type and variable together, blank line between parameters |
+| Blank lines | One after a control block's closing brace, unless `else`/`catch`/`finally` or another `}` follows |
 | Line length | 115 characters max |
 | Continuation | Never use backticks; splat, or break after a pipe or comma |
 | Output | Objects via pipeline, not `Write-Host` |
@@ -73,12 +73,9 @@ Verify approved verbs with `Get-Verb`. Common verbs:
 # Good
 function Get-ServerInfo {
     param(
-        [string[]]
-        $ComputerName,
-        [PSCredential]
-        $Credential,
-        [int]
-        $Port = 5985
+        [string[]]$ComputerName,
+        [PSCredential]$Credential,
+        [int]$Port = 5985
     )
 }
 
@@ -119,12 +116,10 @@ function Get-ServiceStatus {
     param(
         [Parameter(Mandatory, ValueFromPipeline)]
         [ValidateNotNullOrEmpty()]
-        [string[]]
-        $ServiceName,
+        [string[]]$ServiceName,
 
         [Parameter()]
-        [string]
-        $ComputerName = $env:COMPUTERNAME
+        [string]$ComputerName = $env:COMPUTERNAME
     )
 
     begin {
@@ -163,24 +158,19 @@ Use validation attributes instead of manual checks:
 ```powershell
 param(
     [ValidateNotNullOrEmpty()]
-    [string]
-    $Name,
+    [string]$Name,
 
     [ValidateRange(1, 65535)]
-    [int]
-    $Port,
+    [int]$Port,
 
     [ValidateSet('Development', 'Staging', 'Production')]
-    [string]
-    $Environment,
+    [string]$Environment,
 
     [ValidatePattern('^[a-z0-9]+$')]
-    [string]
-    $Identifier,
+    [string]$Identifier,
 
     [ValidateScript({ Test-Path -Path $_ })]
-    [string]
-    $Path
+    [string]$Path
 )
 ```
 
@@ -196,8 +186,7 @@ and `else`, `elseif`, `catch`, and `finally` share a line with the preceding clo
 function Test-Example {
     [CmdletBinding()]
     param(
-        [string]
-        $Name
+        [string]$Name
     )
 
     if ($Name) {
@@ -210,24 +199,22 @@ function Test-Example {
 
 ### Param Block Layout
 
-Put each parameter's attributes, type, and variable name on their own lines,
-and separate parameters with a blank line.
-The type attribute and the variable are never combined on one line
-(`[string]$Name`) in a multi-parameter `param` block:
+Put each parameter's attributes on their own lines,
+keep the type and variable together on the last line,
+and separate parameters with a blank line
+(this matches the PoshCode examples):
 
 ```powershell
 param (
     # The distribution group to add members to.
     [Parameter(Mandatory)]
     [ValidateNotNullOrEmpty()]
-    [string]
-    $Identity,
+    [string]$Identity,
 
     # Skip the first N rows.
     [Parameter()]
     [ValidateRange(0, [int]::MaxValue)]
-    [int]
-    $Skip
+    [int]$Skip
 )
 ```
 
@@ -235,8 +222,9 @@ A single, simple parameter may stay on one line: `param([string]$Path)`.
 
 ### Blank Lines
 
-Follow a closing brace with a blank line
-when another statement comes after it
+Follow the closing brace of a control block
+(`if`, `foreach`, `while`, `switch`, `try`)
+with a blank line when another statement comes after it
 (this mirrors StyleCop SA1513 in C#):
 
 ```powershell
@@ -248,21 +236,17 @@ if ($rowsRead -gt $lastRow) {
     break
 }
 
-[PSCustomObject]@{
-    Member = $member
-}
-
-continue
+$member = $row.$memberColumn
 ```
 
 Exceptions:
 
 - No blank line before a chained keyword (`else`, `elseif`, `catch`, `finally`).
 - No blank line before another closing brace.
+- Hashtable and `[PSCustomObject]` literals are not control blocks,
+  so a blank line after their closing brace is optional.
 
-Do not add blank lines between ordinary statements
-just to precede a control statement;
-use them sparingly to mark logical sections.
+Use additional blank lines sparingly to mark logical sections.
 
 ### Spacing
 
@@ -329,8 +313,7 @@ function Get-RemoteData {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string]
-        $ComputerName
+        [string]$ComputerName
     )
 
     try {
@@ -422,8 +405,7 @@ function Get-ServiceStatus {
     param (
         # The name of the service to query.
         [Parameter(Mandatory)]
-        [string]
-        $ServiceName
+        [string]$ServiceName
     )
 
     Get-Service -Name $ServiceName
