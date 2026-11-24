@@ -64,6 +64,7 @@ Verify approved verbs with `Get-Verb`. Common verbs:
 - Use **full parameter names** in scripts (not aliases)
 - Name every parameter you pass (`Get-Process -Name Explorer`, not `Get-Process Explorer`),
   because readers may not know the command and a future parameter set change can break positional calls
+- This includes scriptblock parameters: `Where-Object -FilterScript { ... }` and `ForEach-Object -Process { ... }`
 - This includes the `Write-*` cmdlets: use `-Message` (`Write-Verbose -Message "Loaded $count rows"`),
   and `-MessageData` for `Write-Information`
 - Match common cmdlet parameter names
@@ -177,7 +178,7 @@ param(
     [string]
     $Identifier,
 
-    [ValidateScript({ Test-Path $_ })]
+    [ValidateScript({ Test-Path -Path $_ })]
     [string]
     $Path
 )
@@ -276,7 +277,7 @@ Get-Process -Name 'explorer', 'notepad'
 
 # Inside braces and subexpressions
 $value = $( Get-Date )
-$scriptblock = { Write-Output 'Hello' }
+$scriptblock = { Write-Output -InputObject 'Hello' }
 
 # No space in variable delimiters
 ${env:PATH}
@@ -304,7 +305,7 @@ Copy-Item @params
 
 # Good - implied continuation after a pipe
 $result = Get-ChildItem -Path $path |
-    Where-Object { $_.Length -gt 1MB } |
+    Where-Object -FilterScript { $_.Length -gt 1MB } |
     Sort-Object -Property Length -Descending
 
 # Good - long string split inside parentheses
@@ -478,7 +479,7 @@ function Get-DiskInfo {
     param([string]$ComputerName)
 
     Get-CimInstance -ClassName Win32_LogicalDisk -ComputerName $ComputerName |
-        ForEach-Object {
+        ForEach-Object -Process {
             [PSCustomObject]@{
                 Drive = $_.DeviceID
                 SizeBytes = $_.Size          # Raw bytes, not formatted
@@ -489,7 +490,7 @@ function Get-DiskInfo {
 
 # Controller (script) - formats for specific use
 $report = Get-DiskInfo -ComputerName 'Server01' |
-    Select-Object Drive,
+    Select-Object -Property Drive,
         @{N='SizeGB'; E={[math]::Round($_.SizeBytes/1GB, 2)}},
         @{N='FreeGB'; E={[math]::Round($_.FreeBytes/1GB, 2)}}
 $report | Format-Table

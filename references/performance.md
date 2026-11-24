@@ -16,7 +16,7 @@ foreach ($result in Do-Something) {
 }
 
 # Pipeline version — slower but streams objects
-Do-Something | ForEach-Object {
+Do-Something | ForEach-Object -Process {
     $_.PropertyOne + $_.PropertyTwo
 }
 ```

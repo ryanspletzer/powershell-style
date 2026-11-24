@@ -124,7 +124,7 @@ param(
 | `[ValidateLength()]` | String length | `[ValidateLength(1,50)]` |
 | `[ValidateCount()]` | Array count | `[ValidateCount(1,10)]` |
 | `[ValidatePattern()]` | Regex match | `[ValidatePattern('^[a-z]+$')]` |
-| `[ValidateScript()]` | Custom logic | `[ValidateScript({Test-Path $_})]` |
+| `[ValidateScript()]` | Custom logic | `[ValidateScript({Test-Path -Path $_})]` |
 
 ### Allow Attributes
 
@@ -212,7 +212,7 @@ function ConvertTo-Upper {
 function ConvertTo-Upper {
     param([string[]]$Text)
 
-    $Text | ForEach-Object { $_.ToUpper() }  # Waits for all input
+    $Text | ForEach-Object -Process { $_.ToUpper() }  # Waits for all input
 }
 ```
 
@@ -252,7 +252,7 @@ process {
         # Each object streams immediately
         [PSCustomObject]@{
             Computer = $computer
-            Status = Test-Connection $computer -Count 1 -Quiet
+            Status = Test-Connection -TargetName $computer -Count 1 -Quiet
         }
     }
 }

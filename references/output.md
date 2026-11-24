@@ -25,7 +25,7 @@ Function results and pipeline data:
 function Get-DiskSpace {
     # Objects go to output stream automatically
     Get-CimInstance -ClassName Win32_LogicalDisk |
-        ForEach-Object {
+        ForEach-Object -Process {
             [PSCustomObject]@{
                 Drive = $_.DeviceID
                 FreeBytes = $_.FreeSpace
@@ -61,7 +61,7 @@ Non-fatal issues the user should know about:
 function Update-Config {
     param([string]$Path)
 
-    if (Test-Path $Path) {
+    if (Test-Path -Path $Path) {
         Write-Warning -Message "Config already exists - will be overwritten"
     }
     # Continue with update...
@@ -134,7 +134,7 @@ function Install-Package {
 ```powershell
 # Bad - can't be captured, redirected, or suppressed
 function Get-Status {
-    Write-Host "Server is online"  # Goes directly to host
+    Write-Host -Object "Server is online"  # Goes directly to host
 }
 
 $result = Get-Status  # $result is empty!
@@ -146,16 +146,16 @@ Only for commands with `Show` or `Format` verbs:
 
 ```powershell
 function Show-Banner {
-    Write-Host '================================' -ForegroundColor Cyan
-    Write-Host '   Welcome to My Application    ' -ForegroundColor White
-    Write-Host '================================' -ForegroundColor Cyan
+    Write-Host -Object '================================' -ForegroundColor Cyan
+    Write-Host -Object '   Welcome to My Application    ' -ForegroundColor White
+    Write-Host -Object '================================' -ForegroundColor Cyan
 }
 
 function Format-Report {
     param([switch]$Formatted)
 
     if ($Formatted) {
-        Write-Host 'Report Summary' -ForegroundColor Green
+        Write-Host -Object 'Report Summary' -ForegroundColor Green
         # Display-only formatting...
     }
 }
@@ -195,7 +195,7 @@ function Get-DiskInfo {
 }
 
 # Caller formats as needed
-Get-DiskInfo | ForEach-Object {
+Get-DiskInfo | ForEach-Object -Process {
     [PSCustomObject]@{
         Drive = $_.Drive
         SizeGB = [math]::Round($_.SizeBytes / 1GB, 2)
@@ -278,10 +278,10 @@ function Get-LargeData {
 
 ```powershell
 # Good - format at display time
-Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 | Format-Table
+Get-Process | Sort-Object -Property CPU -Descending | Select-Object -First 5 | Format-Table
 
 # Bad - format breaks pipeline
-Get-Process | Format-Table | Sort-Object CPU  # Won't work as expected
+Get-Process | Format-Table | Sort-Object -Property CPU  # Won't work as expected
 ```
 
 ### Use Format Files for Custom Types
