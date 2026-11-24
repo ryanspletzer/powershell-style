@@ -22,6 +22,7 @@ Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/Power
 | Parameters | Full names, PascalCase, explicit types; name every argument, including `-Message` |
 | Indentation | 4 spaces (not tabs) |
 | Braces | Opening brace on same line (OTBS); `} else {`, `} catch {`, `} finally {` stay cuddled |
+| Script/function blocks | Explicit `begin`/`process`/`end` in order; always a `process`; no implicit `end` |
 | Param blocks | Attributes on their own lines, type and variable together, blank line between parameters |
 | Blank lines | One after a control block's closing brace, unless `else`/`catch`/`finally` or another `}` follows |
 | Line length | 115 characters max |
@@ -147,9 +148,36 @@ function Get-ServiceStatus {
 
 1. **Include `[CmdletBinding()]`** - Enables common parameters (-Verbose, -Debug, etc.)
 2. **Declare `[OutputType()]`** - Documents return type for tooling
-3. **Use `process {}` block** - Required when accepting pipeline input
+3. **Use explicit `begin {}`, `process {}`, and `end {}` blocks** - See below
 4. **Output objects in `process {}`** - Not in `begin {}` or `end {}`
 5. **No `return` keyword** - Just output the object directly
+
+### Begin, Process, and End Blocks
+
+Every script and function uses explicit named blocks, written in execution order
+(`param`, then `begin`, `process`, `end`):
+
+- **Always write a `process {}` block.**
+  Without one, the body runs in the implicit `end` block,
+  so a function that accepts pipeline input only sees the last object.
+  Using `process` everywhere keeps functions pipeline-ready
+  and gives scripts and functions one consistent shape.
+- **Never rely on the implicit `end` block, and avoid `filter`.**
+  Name the block so the structure is explicit.
+- **Use `begin {}` for one-time setup**
+  (counters, lookups, stopwatches, up-front queries)
+  and **`end {}` for teardown or a final summary.**
+  Omit a `begin` or `end` block only when it would be empty.
+- Once a script or function has named blocks,
+  all executable code must live inside them
+  (only `#Requires`, `using`, the help block, attributes, and `param` sit outside).
+  A helper function or loose statement between `param` and the blocks
+  makes PowerShell treat `process {` as a call to `Get-Process`,
+  so define helpers inside `begin {}`.
+
+This follows the PoshCode guidance to start every script from
+`[CmdletBinding()] param () process { } end { }`
+and to prefer explicit, ordered blocks.
 
 ### Parameter Validation
 

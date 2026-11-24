@@ -146,6 +146,10 @@ param(
 
 ### When to Use Each
 
+Use explicit, ordered blocks in every script and function:
+always a `process`, plus `begin` and `end` whenever there is setup or teardown.
+Never rely on the implicit `end` block.
+
 ```powershell
 function Get-FormattedData {
     [CmdletBinding()]
