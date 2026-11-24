@@ -19,7 +19,7 @@ Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/Power
 | Topic | Key Rule |
 |-------|----------|
 | Function names | `Verb-Noun` with approved verbs |
-| Parameters | Full names, PascalCase, explicit types; name every argument except a lone `Write-*` message |
+| Parameters | Full names, PascalCase, explicit types; name every argument, including `-Message` |
 | Indentation | 4 spaces (not tabs) |
 | Braces | Opening brace on same line (OTBS); `} else {`, `} catch {`, `} finally {` stay cuddled |
 | Param blocks | Type attribute and variable each on their own line, blank line between parameters |
@@ -64,9 +64,8 @@ Verify approved verbs with `Get-Verb`. Common verbs:
 - Use **full parameter names** in scripts (not aliases)
 - Name every parameter you pass (`Get-Process -Name Explorer`, not `Get-Process Explorer`),
   because readers may not know the command and a future parameter set change can break positional calls
-- Exception: the single message argument to `Write-Verbose`, `Write-Warning`, `Write-Error`,
-  `Write-Debug`, and `Write-Information` may be passed positionally
-  (`Write-Verbose "Loaded $count rows"`)
+- This includes the `Write-*` cmdlets: use `-Message` (`Write-Verbose -Message "Loaded $count rows"`),
+  and `-MessageData` for `Write-Information`
 - Match common cmdlet parameter names
 
 ```powershell
@@ -201,9 +200,9 @@ function Test-Example {
     )
 
     if ($Name) {
-        Write-Verbose "Processing: $Name"
+        Write-Verbose -Message "Processing: $Name"
     } else {
-        Write-Warning 'No name provided'
+        Write-Warning -Message 'No name provided'
     }
 }
 ```
@@ -309,7 +308,7 @@ $result = Get-ChildItem -Path $path |
     Sort-Object -Property Length -Descending
 
 # Good - long string split inside parentheses
-Write-Warning (
+Write-Warning -Message (
     "Column '$idColumn' not found in $file; " +
     'existing members cannot be prefiltered.'
 )
@@ -343,7 +342,7 @@ function Get-RemoteData {
     } catch {
         # Capture error immediately - $_ can be overwritten
         $errorRecord = $_
-        Write-Error "Failed to connect to $ComputerName : $($errorRecord.Exception.Message)"
+        Write-Error -Message "Failed to connect to $ComputerName : $($errorRecord.Exception.Message)"
     } finally {
         if ($session) {
             Remove-PSSession -Session $session
@@ -379,10 +378,10 @@ function Process-Items {
     param([string[]]$Items)
 
     foreach ($item in $Items) {
-        Write-Verbose "Processing: $item"
+        Write-Verbose -Message "Processing: $item"
 
         if (Test-ShouldSkip -Item $item) {
-            Write-Warning "Skipping $item - already processed"
+            Write-Warning -Message "Skipping $item - already processed"
             continue
         }
 

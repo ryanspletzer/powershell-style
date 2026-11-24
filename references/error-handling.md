@@ -29,7 +29,7 @@ Use `-ErrorAction Stop`:
 try {
     Get-Item -Path '/nonexistent' -ErrorAction Stop
 } catch {
-    Write-Warning "File not found: $($_.Exception.Message)"
+    Write-Warning -Message "File not found: $($_.Exception.Message)"
 }
 ```
 
@@ -59,13 +59,13 @@ try {
     $result = Get-Content -Path $filePath -ErrorAction Stop
 } catch [System.IO.FileNotFoundException] {
     # Handle specific exception type
-    Write-Warning "File not found: $filePath"
+    Write-Warning -Message "File not found: $filePath"
 } catch [System.UnauthorizedAccessException] {
     # Handle another specific type
-    Write-Error "Access denied: $filePath"
+    Write-Error -Message "Access denied: $filePath"
 } catch {
     # Handle all other errors
-    Write-Error "Unexpected error: $($_.Exception.Message)"
+    Write-Error -Message "Unexpected error: $($_.Exception.Message)"
 } finally {
     # Always runs - use for cleanup
     if ($resource) {
@@ -86,7 +86,7 @@ catch {
     $errorType = $errorRecord.Exception.GetType().Name
     $errorLine = $errorRecord.InvocationInfo.ScriptLineNumber
 
-    Write-Error "[$errorType] Line $errorLine : $errorMessage"
+    Write-Error -Message "[$errorType] Line $errorLine : $errorMessage"
 }
 ```
 
@@ -110,14 +110,14 @@ catch {
 # Bad - $? only indicates completion, not success
 Get-Item -Path '/file'
 if (-not $?) {
-    Write-Error 'Failed'  # May not trigger
+    Write-Error -Message 'Failed'  # May not trigger
 }
 
 # Good - use try/catch
 try {
     Get-Item -Path '/file' -ErrorAction Stop
 } catch {
-    Write-Error 'Failed'
+    Write-Error -Message 'Failed'
 }
 ```
 
@@ -134,10 +134,10 @@ if ($null -eq $result) {
 try {
     $result = Get-SomeData -ErrorAction Stop
     if ($result.Count -eq 0) {
-        Write-Verbose 'No data found'
+        Write-Verbose -Message 'No data found'
     }
 } catch {
-    Write-Error 'Failed to retrieve data'
+    Write-Error -Message 'Failed to retrieve data'
 }
 ```
 
@@ -150,7 +150,7 @@ Get-Item -Path '/file' -ErrorAction SilentlyContinue
 # Better - capture for logging
 $result = Get-Item -Path '/file' -ErrorAction SilentlyContinue -ErrorVariable getError
 if ($getError) {
-    Write-Verbose "Suppressed error: $($getError[0].Exception.Message)"
+    Write-Verbose -Message "Suppressed error: $($getError[0].Exception.Message)"
 }
 ```
 
@@ -182,9 +182,9 @@ function Update-Configuration {
         # Step 3: Write back
         $config | ConvertTo-Json | Set-Content -Path $Path -ErrorAction Stop
 
-        Write-Verbose 'Configuration updated successfully'
+        Write-Verbose -Message 'Configuration updated successfully'
     } catch {
-        Write-Error "Configuration update failed: $($_.Exception.Message)"
+        Write-Error -Message "Configuration update failed: $($_.Exception.Message)"
         # Entire transaction failed - no partial updates
     }
 }
@@ -245,7 +245,7 @@ throw $errorRecord
 
 ```powershell
 # Simple message
-Write-Error 'Operation failed'
+Write-Error -Message 'Operation failed'
 
 # With details
 Write-Error -Message 'File not found' -Category ObjectNotFound -TargetObject $path

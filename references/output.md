@@ -47,7 +47,7 @@ function Get-ServiceInfo {
         if ($service) {
             $service
         } else {
-            Write-Error "Service not found: $svc" -Category ObjectNotFound
+            Write-Error -Message "Service not found: $svc" -Category ObjectNotFound
         }
     }
 }
@@ -62,7 +62,7 @@ function Update-Config {
     param([string]$Path)
 
     if (Test-Path $Path) {
-        Write-Warning "Config already exists - will be overwritten"
+        Write-Warning -Message "Config already exists - will be overwritten"
     }
     # Continue with update...
 }
@@ -77,17 +77,17 @@ function Sync-Data {
     [CmdletBinding()]  # Required for -Verbose support
     param([string]$Source, [string]$Destination)
 
-    Write-Verbose "Starting sync from $Source to $Destination"
+    Write-Verbose -Message "Starting sync from $Source to $Destination"
 
     $files = Get-ChildItem -Path $Source
-    Write-Verbose "Found $($files.Count) files to process"
+    Write-Verbose -Message "Found $($files.Count) files to process"
 
     foreach ($file in $files) {
-        Write-Verbose "Processing: $($file.Name)"
+        Write-Verbose -Message "Processing: $($file.Name)"
         # ...
     }
 
-    Write-Verbose 'Sync complete'
+    Write-Verbose -Message 'Sync complete'
 }
 ```
 
@@ -100,13 +100,13 @@ function Calculate-Value {
     [CmdletBinding()]  # Required for -Debug support
     param([int]$Input)
 
-    Write-Debug "Input value: $Input"
+    Write-Debug -Message "Input value: $Input"
 
     $intermediate = $Input * 2
-    Write-Debug "After multiplication: $intermediate"
+    Write-Debug -Message "After multiplication: $intermediate"
 
     $result = $intermediate + 10
-    Write-Debug "Final result: $result"
+    Write-Debug -Message "Final result: $result"
 
     $result
 }
@@ -121,9 +121,9 @@ function Install-Package {
     [CmdletBinding()]
     param([string]$Name)
 
-    Write-Information "Installing $Name..." -Tags 'Progress'
+    Write-Information -MessageData "Installing $Name..." -Tags 'Progress'
     # ...
-    Write-Information "Installation complete" -Tags 'Success'
+    Write-Information -MessageData "Installation complete" -Tags 'Success'
 }
 ```
 
@@ -358,7 +358,7 @@ Progress disappears after completion - also log important info:
 
 ```powershell
 Write-Progress -Activity 'Processing' -Status 'Server1'
-Write-Verbose 'Processing Server1'  # Persists in verbose output
+Write-Verbose -Message 'Processing Server1'  # Persists in verbose output
 ```
 
 ## Summary

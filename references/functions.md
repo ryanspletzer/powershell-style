@@ -165,7 +165,7 @@ function Get-FormattedData {
     begin {
         # Runs once before pipeline processing
         # Use for: Connection setup, resource initialization
-        Write-Verbose 'Initializing...'
+        Write-Verbose -Message 'Initializing...'
         $results = [System.Collections.Generic.List[object]]::new()
     }
 
@@ -184,7 +184,7 @@ function Get-FormattedData {
     end {
         # Runs once after all pipeline items
         # Use for: Cleanup, final summary output
-        Write-Verbose 'Processing complete'
+        Write-Verbose -Message 'Processing complete'
     }
 }
 ```
