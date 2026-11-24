@@ -19,10 +19,14 @@ Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/Power
 | Topic | Key Rule |
 |-------|----------|
 | Function names | `Verb-Noun` with approved verbs |
-| Parameters | Full names, PascalCase, explicit types |
+| Parameters | Full names, PascalCase, explicit types; name every argument, including `-Message` |
 | Indentation | 4 spaces (not tabs) |
-| Braces | Opening brace on same line (OTBS) |
+| Braces | Opening brace on same line (OTBS); `} else {`, `} catch {`, `} finally {` stay cuddled |
+| Script/function blocks | Explicit `begin`/`process`/`end` in order; always a `process`; no implicit `end` |
+| Param blocks | Attributes on their own lines, type and variable together, blank line between parameters |
+| Blank lines | One after a control block's closing brace, unless `else`/`catch`/`finally` or another `}` follows |
 | Line length | 115 characters max |
+| Continuation | Never use backticks; splat, or break after a pipe or comma |
 | Output | Objects via pipeline, not `Write-Host` |
 | Documentation | Comment-based help inside every function |
 | Performance | Measure with `Measure-Command`; prefer readability for small datasets |
@@ -59,6 +63,11 @@ Verify approved verbs with `Get-Verb`. Common verbs:
 
 - Use **PascalCase** for all public identifiers
 - Use **full parameter names** in scripts (not aliases)
+- Name every parameter you pass (`Get-Process -Name Explorer`, not `Get-Process Explorer`),
+  because readers may not know the command and a future parameter set change can break positional calls
+- This includes scriptblock parameters: `Where-Object -FilterScript { ... }` and `ForEach-Object -Process { ... }`
+- This includes the `Write-*` cmdlets: use `-Message` (`Write-Verbose -Message "Loaded $count rows"`),
+  and `-MessageData` for `Write-Information`
 - Match common cmdlet parameter names
 
 ```powershell
@@ -139,9 +148,36 @@ function Get-ServiceStatus {
 
 1. **Include `[CmdletBinding()]`** - Enables common parameters (-Verbose, -Debug, etc.)
 2. **Declare `[OutputType()]`** - Documents return type for tooling
-3. **Use `process {}` block** - Required when accepting pipeline input
+3. **Use explicit `begin {}`, `process {}`, and `end {}` blocks** - See below
 4. **Output objects in `process {}`** - Not in `begin {}` or `end {}`
 5. **No `return` keyword** - Just output the object directly
+
+### Begin, Process, and End Blocks
+
+Every script and function uses explicit named blocks, written in execution order
+(`param`, then `begin`, `process`, `end`):
+
+- **Always write a `process {}` block.**
+  Without one, the body runs in the implicit `end` block,
+  so a function that accepts pipeline input only sees the last object.
+  Using `process` everywhere keeps functions pipeline-ready
+  and gives scripts and functions one consistent shape.
+- **Never rely on the implicit `end` block, and avoid `filter`.**
+  Name the block so the structure is explicit.
+- **Use `begin {}` for one-time setup**
+  (counters, lookups, stopwatches, up-front queries)
+  and **`end {}` for teardown or a final summary.**
+  Omit a `begin` or `end` block only when it would be empty.
+- Once a script or function has named blocks,
+  all executable code must live inside them
+  (only `#Requires`, `using`, the help block, attributes, and `param` sit outside).
+  A helper function or loose statement between `param` and the blocks
+  makes PowerShell treat `process {` as a call to `Get-Process`,
+  so define helpers inside `begin {}`.
+
+This follows the PoshCode guidance to start every script from
+`[CmdletBinding()] param () process { } end { }`
+and to prefer explicit, ordered blocks.
 
 ### Parameter Validation
 
@@ -161,7 +197,7 @@ param(
     [ValidatePattern('^[a-z0-9]+$')]
     [string]$Identifier,
 
-    [ValidateScript({ Test-Path $_ })]
+    [ValidateScript({ Test-Path -Path $_ })]
     [string]$Path
 )
 ```
@@ -170,7 +206,9 @@ param(
 
 ### Indentation and Braces
 
-Use 4 spaces and One True Brace Style (OTBS):
+Use 4 spaces and One True Brace Style (OTBS).
+The opening brace ends the line,
+and `else`, `elseif`, `catch`, and `finally` share a line with the preceding closing brace:
 
 ```powershell
 function Test-Example {
@@ -180,12 +218,63 @@ function Test-Example {
     )
 
     if ($Name) {
-        Write-Verbose "Processing: $Name"
+        Write-Verbose -Message "Processing: $Name"
     } else {
-        Write-Warning 'No name provided'
+        Write-Warning -Message 'No name provided'
     }
 }
 ```
+
+### Param Block Layout
+
+Put each parameter's attributes on their own lines,
+keep the type and variable together on the last line,
+and separate parameters with a blank line
+(this matches the PoshCode examples):
+
+```powershell
+param (
+    # The distribution group to add members to.
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]$Identity,
+
+    # Skip the first N rows.
+    [Parameter()]
+    [ValidateRange(0, [int]::MaxValue)]
+    [int]$Skip
+)
+```
+
+A single, simple parameter may stay on one line: `param([string]$Path)`.
+
+### Blank Lines
+
+Follow the closing brace of a control block
+(`if`, `foreach`, `while`, `switch`, `try`)
+with a blank line when another statement comes after it
+(this mirrors StyleCop SA1513 in C#):
+
+```powershell
+if ($rowsRead -le $skipCount) {
+    continue
+}
+
+if ($rowsRead -gt $lastRow) {
+    break
+}
+
+$member = $row.$memberColumn
+```
+
+Exceptions:
+
+- No blank line before a chained keyword (`else`, `elseif`, `catch`, `finally`).
+- No blank line before another closing brace.
+- Hashtable and `[PSCustomObject]` literals are not control blocks,
+  so a blank line after their closing brace is optional.
+
+Use additional blank lines sparingly to mark logical sections.
 
 ### Spacing
 
@@ -200,7 +289,7 @@ Get-Process -Name 'explorer', 'notepad'
 
 # Inside braces and subexpressions
 $value = $( Get-Date )
-$scriptblock = { Write-Output 'Hello' }
+$scriptblock = { Write-Output -InputObject 'Hello' }
 
 # No space in variable delimiters
 ${env:PATH}
@@ -208,7 +297,13 @@ ${env:PATH}
 
 ### Line Length and Continuation
 
-Limit lines to 115 characters. Use splatting for long commands:
+Limit lines to 115 characters.
+**Never use backticks for line continuation**, including in help examples.
+A trailing space after a backtick silently breaks the command,
+and the backtick is easy to miss and mistype.
+Use splatting for long commands,
+break after a pipe or comma,
+or wrap an expression in parentheses:
 
 ```powershell
 # Good - splatting
@@ -220,12 +315,18 @@ $params = @{
 }
 Copy-Item @params
 
-# Good - implied continuation in parentheses
+# Good - implied continuation after a pipe
 $result = Get-ChildItem -Path $path |
-    Where-Object { $_.Length -gt 1MB } |
+    Where-Object -FilterScript { $_.Length -gt 1MB } |
     Sort-Object -Property Length -Descending
 
-# Avoid - backtick continuation
+# Good - long string split inside parentheses
+Write-Warning -Message (
+    "Column '$idColumn' not found in $file; " +
+    'existing members cannot be prefiltered.'
+)
+
+# Bad - backtick continuation
 Copy-Item -Path $filePath `
     -Destination $targetPath `
     -Force
@@ -250,13 +351,11 @@ function Get-RemoteData {
         Invoke-Command -Session $session -ScriptBlock {
             Get-Process
         }
-    }
-    catch {
+    } catch {
         # Capture error immediately - $_ can be overwritten
         $errorRecord = $_
-        Write-Error "Failed to connect to $ComputerName : $($errorRecord.Exception.Message)"
-    }
-    finally {
+        Write-Error -Message "Failed to connect to $ComputerName : $($errorRecord.Exception.Message)"
+    } finally {
         if ($session) {
             Remove-PSSession -Session $session
         }
@@ -291,10 +390,10 @@ function Process-Items {
     param([string[]]$Items)
 
     foreach ($item in $Items) {
-        Write-Verbose "Processing: $item"
+        Write-Verbose -Message "Processing: $item"
 
         if (Test-ShouldSkip -Item $item) {
-            Write-Warning "Skipping $item - already processed"
+            Write-Warning -Message "Skipping $item - already processed"
             continue
         }
 
@@ -390,7 +489,7 @@ function Get-DiskInfo {
     param([string]$ComputerName)
 
     Get-CimInstance -ClassName Win32_LogicalDisk -ComputerName $ComputerName |
-        ForEach-Object {
+        ForEach-Object -Process {
             [PSCustomObject]@{
                 Drive = $_.DeviceID
                 SizeBytes = $_.Size          # Raw bytes, not formatted
@@ -401,7 +500,7 @@ function Get-DiskInfo {
 
 # Controller (script) - formats for specific use
 $report = Get-DiskInfo -ComputerName 'Server01' |
-    Select-Object Drive,
+    Select-Object -Property Drive,
         @{N='SizeGB'; E={[math]::Round($_.SizeBytes/1GB, 2)}},
         @{N='FreeGB'; E={[math]::Round($_.FreeBytes/1GB, 2)}}
 $report | Format-Table

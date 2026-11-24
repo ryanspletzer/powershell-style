@@ -25,7 +25,7 @@ Function results and pipeline data:
 function Get-DiskSpace {
     # Objects go to output stream automatically
     Get-CimInstance -ClassName Win32_LogicalDisk |
-        ForEach-Object {
+        ForEach-Object -Process {
             [PSCustomObject]@{
                 Drive = $_.DeviceID
                 FreeBytes = $_.FreeSpace
@@ -47,7 +47,7 @@ function Get-ServiceInfo {
         if ($service) {
             $service
         } else {
-            Write-Error "Service not found: $svc" -Category ObjectNotFound
+            Write-Error -Message "Service not found: $svc" -Category ObjectNotFound
         }
     }
 }
@@ -61,8 +61,8 @@ Non-fatal issues the user should know about:
 function Update-Config {
     param([string]$Path)
 
-    if (Test-Path $Path) {
-        Write-Warning "Config already exists - will be overwritten"
+    if (Test-Path -Path $Path) {
+        Write-Warning -Message "Config already exists - will be overwritten"
     }
     # Continue with update...
 }
@@ -77,17 +77,17 @@ function Sync-Data {
     [CmdletBinding()]  # Required for -Verbose support
     param([string]$Source, [string]$Destination)
 
-    Write-Verbose "Starting sync from $Source to $Destination"
+    Write-Verbose -Message "Starting sync from $Source to $Destination"
 
     $files = Get-ChildItem -Path $Source
-    Write-Verbose "Found $($files.Count) files to process"
+    Write-Verbose -Message "Found $($files.Count) files to process"
 
     foreach ($file in $files) {
-        Write-Verbose "Processing: $($file.Name)"
+        Write-Verbose -Message "Processing: $($file.Name)"
         # ...
     }
 
-    Write-Verbose 'Sync complete'
+    Write-Verbose -Message 'Sync complete'
 }
 ```
 
@@ -100,13 +100,13 @@ function Calculate-Value {
     [CmdletBinding()]  # Required for -Debug support
     param([int]$Input)
 
-    Write-Debug "Input value: $Input"
+    Write-Debug -Message "Input value: $Input"
 
     $intermediate = $Input * 2
-    Write-Debug "After multiplication: $intermediate"
+    Write-Debug -Message "After multiplication: $intermediate"
 
     $result = $intermediate + 10
-    Write-Debug "Final result: $result"
+    Write-Debug -Message "Final result: $result"
 
     $result
 }
@@ -121,9 +121,9 @@ function Install-Package {
     [CmdletBinding()]
     param([string]$Name)
 
-    Write-Information "Installing $Name..." -Tags 'Progress'
+    Write-Information -MessageData "Installing $Name..." -Tags 'Progress'
     # ...
-    Write-Information "Installation complete" -Tags 'Success'
+    Write-Information -MessageData "Installation complete" -Tags 'Success'
 }
 ```
 
@@ -134,7 +134,7 @@ function Install-Package {
 ```powershell
 # Bad - can't be captured, redirected, or suppressed
 function Get-Status {
-    Write-Host "Server is online"  # Goes directly to host
+    Write-Host -Object "Server is online"  # Goes directly to host
 }
 
 $result = Get-Status  # $result is empty!
@@ -146,16 +146,16 @@ Only for commands with `Show` or `Format` verbs:
 
 ```powershell
 function Show-Banner {
-    Write-Host '================================' -ForegroundColor Cyan
-    Write-Host '   Welcome to My Application    ' -ForegroundColor White
-    Write-Host '================================' -ForegroundColor Cyan
+    Write-Host -Object '================================' -ForegroundColor Cyan
+    Write-Host -Object '   Welcome to My Application    ' -ForegroundColor White
+    Write-Host -Object '================================' -ForegroundColor Cyan
 }
 
 function Format-Report {
     param([switch]$Formatted)
 
     if ($Formatted) {
-        Write-Host 'Report Summary' -ForegroundColor Green
+        Write-Host -Object 'Report Summary' -ForegroundColor Green
         # Display-only formatting...
     }
 }
@@ -195,7 +195,7 @@ function Get-DiskInfo {
 }
 
 # Caller formats as needed
-Get-DiskInfo | ForEach-Object {
+Get-DiskInfo | ForEach-Object -Process {
     [PSCustomObject]@{
         Drive = $_.Drive
         SizeGB = [math]::Round($_.SizeBytes / 1GB, 2)
@@ -277,10 +277,10 @@ function Get-LargeData {
 
 ```powershell
 # Good - format at display time
-Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 | Format-Table
+Get-Process | Sort-Object -Property CPU -Descending | Select-Object -First 5 | Format-Table
 
 # Bad - format breaks pipeline
-Get-Process | Format-Table | Sort-Object CPU  # Won't work as expected
+Get-Process | Format-Table | Sort-Object -Property CPU  # Won't work as expected
 ```
 
 ### Use Format Files for Custom Types
@@ -357,7 +357,7 @@ Progress disappears after completion - also log important info:
 
 ```powershell
 Write-Progress -Activity 'Processing' -Status 'Server1'
-Write-Verbose 'Processing Server1'  # Persists in verbose output
+Write-Verbose -Message 'Processing Server1'  # Persists in verbose output
 ```
 
 ## Summary

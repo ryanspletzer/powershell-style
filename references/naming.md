@@ -116,7 +116,7 @@ $mrc = 3
 
 ```powershell
 # Good
-Get-ChildItem -Path $directory | Where-Object { $_.Length -gt 1MB }
+Get-ChildItem -Path $directory | Where-Object -FilterScript { $_.Length -gt 1MB }
 
 # Bad
 gci $directory | ? { $_.Length -gt 1MB }
