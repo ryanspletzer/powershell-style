@@ -1,0 +1,13 @@
+{
+  "name": "ryanspletzer",
+  "owner": {
+    "name": "Ryan Spletzer"
+  },
+  "plugins": [
+    {
+      "name": "powershell-style",
+      "source": "./",
+      "description": "PowerShell best practices and style guidance based on PoshCode/PowerShellPracticeAndStyle"
+    }
+  ]
+}

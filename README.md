@@ -1,7 +1,7 @@
 # PowerShell Style Skill
 
-A Claude Code skill providing PowerShell best practices and style guidance based
-on the community-driven
+A Claude Code skill providing PowerShell best practices and style guidance,
+based on the community-driven
 [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/PowerShellPracticeAndStyle)
 guide.
 
@@ -19,35 +19,72 @@ This skill helps Claude write clean, maintainable PowerShell code by providing:
 
 ## Installation
 
-### For Claude Code Users
+### As a Claude Code plugin
 
-Copy this directory to your Claude Code skills folder or symlink it:
+This repository is both a plugin and its own single-plugin marketplace.
+Add the marketplace, then install the plugin:
 
-```bash
-ln -s ~/git/powershell-style ~/.claude/skills/powershell-style
+```text
+/plugin marketplace add ryanspletzer/powershell-style
+/plugin install powershell-style@ryanspletzer
 ```
 
-### For anthropics/skills Submission
+The skill is then available as `powershell-style:powershell-style`.
 
-This skill is structured for submission to
-[anthropics/skills](https://github.com/anthropics/skills):
+To declare it in `~/.claude/settings.json` instead:
 
-1. Fork the anthropics/skills repository
-2. Copy this directory into your fork
-3. Submit a pull request
+```json
+{
+  "extraKnownMarketplaces": {
+    "ryanspletzer": {
+      "source": {
+        "source": "github",
+        "repo": "ryanspletzer/powershell-style"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "powershell-style@ryanspletzer": true
+  }
+}
+```
+
+Pick up new commits with:
+
+```text
+/plugin marketplace update ryanspletzer
+```
+
+### Local development
+
+Load the working tree directly, without installing:
+
+```bash
+claude --plugin-dir ~/git/powershell-style
+```
+
+### As a standalone skill
+
+Copy or symlink the skill directory into your skills folder:
+
+```bash
+ln -s ~/git/powershell-style/skills/powershell-style ~/.claude/skills/powershell-style
+```
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `SKILL.md` | Main skill file with quick reference and core guidance |
-| `references/naming.md` | Detailed naming conventions |
-| `references/functions.md` | Advanced function patterns |
-| `references/error-handling.md` | Error handling philosophy |
-| `references/output.md` | Output stream guidance |
-| `references/documentation.md` | Comment-based help and commenting rules |
-| `references/performance.md` | Performance measurement and trade-offs |
-| `references/security.md` | Credentials, SecureString, and persistence |
+| `.claude-plugin/plugin.json` | Plugin manifest |
+| `.claude-plugin/marketplace.json` | Marketplace manifest listing this plugin |
+| `skills/powershell-style/SKILL.md` | Main skill file with quick reference and core guidance |
+| `skills/powershell-style/references/naming.md` | Detailed naming conventions |
+| `skills/powershell-style/references/functions.md` | Advanced function patterns |
+| `skills/powershell-style/references/error-handling.md` | Error handling philosophy |
+| `skills/powershell-style/references/output.md` | Output stream guidance |
+| `skills/powershell-style/references/documentation.md` | Comment-based help and commenting rules |
+| `skills/powershell-style/references/performance.md` | Performance measurement and trade-offs |
+| `skills/powershell-style/references/security.md` | Credentials, SecureString, and persistence |
 | `LICENSE` | CC BY-SA 4.0 license |
 | `README.md` | This file |
 
@@ -58,8 +95,8 @@ This skill works alongside:
 - **PowerShell Editor Services LSP** - Code intelligence, go-to-definition
 - **PSScriptAnalyzer** - Static analysis for code issues
 
-The skill provides higher-level design guidance while these tools catch
-syntax-level issues.
+The skill provides higher-level design guidance,
+while these tools catch syntax-level issues.
 
 ## Quick Reference
 
@@ -75,12 +112,11 @@ syntax-level issues.
 ## Attribution
 
 Based on [PoshCode/PowerShellPracticeAndStyle](https://github.com/PoshCode/PowerShellPracticeAndStyle)
-by Don Jones, Matt Penny, Carlos Perez, Joel Bennett, and the PowerShell
-community.
+by Don Jones, Matt Penny, Carlos Perez, Joel Bennett, and the PowerShell community.
 
 ## License
 
 [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](LICENSE)
 
-This license matches the original PoshCode guide, ensuring derivative works
-maintain the same open licensing terms.
+This license matches the original PoshCode guide,
+ensuring derivative works maintain the same open licensing terms.
