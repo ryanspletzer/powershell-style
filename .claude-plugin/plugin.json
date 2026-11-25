@@ -1,0 +1,11 @@
+{
+  "name": "powershell-style",
+  "description": "PowerShell best practices and style guidance based on PoshCode/PowerShellPracticeAndStyle",
+  "author": {
+    "name": "Ryan Spletzer"
+  },
+  "homepage": "https://github.com/ryanspletzer/powershell-style",
+  "repository": "https://github.com/ryanspletzer/powershell-style",
+  "license": "CC-BY-SA-4.0",
+  "keywords": ["powershell", "style", "best-practices"]
+}
