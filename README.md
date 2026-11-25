@@ -55,6 +55,18 @@ Pick up new commits with:
 /plugin marketplace update ryanspletzer
 ```
 
+### As an Antigravity CLI plugin
+
+`agy` reads the native manifest in `.antigravity-plugin/plugin.json`.
+Install straight from GitHub:
+
+```bash
+agy plugin install https://github.com/ryanspletzer/powershell-style
+```
+
+The install is a copy, not a tracked marketplace entry.
+Re-run the same command to pick up new commits.
+
 ### Local development
 
 Load the working tree directly, without installing:
@@ -75,8 +87,9 @@ ln -s ~/git/powershell-style/skills/powershell-style ~/.claude/skills/powershell
 
 | File | Description |
 |------|-------------|
-| `.claude-plugin/plugin.json` | Plugin manifest |
+| `.claude-plugin/plugin.json` | Claude Code plugin manifest |
 | `.claude-plugin/marketplace.json` | Marketplace manifest listing this plugin |
+| `.antigravity-plugin/plugin.json` | Antigravity CLI plugin manifest |
 | `skills/powershell-style/SKILL.md` | Main skill file with quick reference and core guidance |
 | `skills/powershell-style/references/naming.md` | Detailed naming conventions |
 | `skills/powershell-style/references/functions.md` | Advanced function patterns |
